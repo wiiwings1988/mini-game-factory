@@ -1,0 +1,74 @@
+# Chatwoot 自托管栈：玩家反馈的对外一层。
+#
+# 为什么是 Chatwoot：它同时具备 help desk 的六件事——多渠道收口、
+# 队列与 SLA、线程式对外回复、按联系人合并历史、帮助中心、报表。
+# 我们自建的那 629 行只有「收 + 转」，缺的正是「回」和「用户能看到进度」。
+#
+# 跑法（macOS 用 colima，不需要管理员密码）：
+#   brew install colima docker docker-compose
+#   colima start --cpu 4 --memory 8 --disk 60
+#   cd tools/helpdesk
+#   docker compose run --rm rails bundle exec rails db:chatwoot_prepare   # 仅首次
+#   docker compose up -d
+#
+# 迁到云主机时，整个目录原样复制过去，只改 .env 里的 FRONTEND_URL。
+
+services:
+  base: &base
+    image: chatwoot/chatwoot:latest
+    env_file: .env
+    environment:
+      - NODE_ENV=production
+      - RAILS_ENV=production
+      - INSTALLATION_ENV=docker
+      - POSTGRES_HOST=postgres
+      - POSTGRES_USERNAME=postgres
+      - POSTGRES_DATABASE=chatwoot_production
+      - REDIS_URL=redis://redis:6379
+      - RAILS_MAX_THREADS=5
+      - WEB_CONCURRENCY=2
+    volumes:
+      - chatwoot_storage:/app/storage
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    restart: unless-stopped
+
+  rails:
+    <<: *base
+    ports:
+      - "3000:3000"
+    command: bundle exec rails s -p 3000 -b 0.0.0.0
+
+  sidekiq:
+    <<: *base
+    command: bundle exec sidekiq -C config/sidekiq.yml
+
+  postgres:
+    image: pgvector/pgvector:pg16
+    environment:
+      - POSTGRES_DB=chatwoot_production
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+
+volumes:
+  chatwoot_storage:
+  postgres_data:
+  redis_data:

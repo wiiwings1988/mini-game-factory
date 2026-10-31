@@ -12,3 +12,5 @@ tools/feedback-service/data/
 .pnpm-store/
 .reasonix/
 .multica/
+tools/helpdesk/.env
+!.env.example
