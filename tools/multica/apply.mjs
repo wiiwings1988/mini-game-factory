@@ -104,6 +104,19 @@ function ensureAgents() {
   }
 }
 
+// ---------------------------------------------------------------- archive ---
+function archiveRetiredAgents() {
+  const retired = factory.archiveAgents ?? [];
+  if (retired.length === 0) return;
+  const existing = cli(["agent", "list", "--output", "json"]).data ?? [];
+  for (const name of retired) {
+    const found = existing.find((a) => a.name === name && !a.archived_at);
+    if (!found) continue;
+    cli(["agent", "archive", found.id, "--output", "json"]);
+    console.log(`[apply] agent archived: ${name} (${found.id})`);
+  }
+}
+
 // ------------------------------------------------------------- autopilots ---
 function ensureAutopilots(projectId) {
   const listed = cli(["autopilot", "list", "--output", "json"]).data;
@@ -114,11 +127,11 @@ function ensureAutopilots(projectId) {
       console.error(`[apply] autopilot ${ap.title}: agent ${ap.agent} has no id yet`);
       process.exit(1);
     }
-    const found = existing.find((a) => a.title === ap.title);
+    const found = existing.find((a) => a.title === ap.title || (ap.titleFrom && a.title === ap.titleFrom));
     let id = found?.id;
     if (found) {
-      cli(["autopilot", "update", id, "--description", ap.description, "--status", "active", "--output", "json"]);
-      console.log(`[apply] autopilot updated: ${ap.title} (${id})`);
+      cli(["autopilot", "update", id, "--title", ap.title, "--agent", agentId, "--description", ap.description, "--status", "active", "--output", "json"]);
+      console.log(`[apply] autopilot updated: ${found.title} → ${ap.title} (${id})`);
     } else {
       const created = cli([
         "autopilot", "create",
@@ -150,6 +163,7 @@ function ensureAutopilots(projectId) {
 // ------------------------------------------------------------------ main ----
 const projectId = ensureProject();
 ensureAgents();
+archiveRetiredAgents();
 ensureAutopilots(projectId);
 
 if (!dryRun) {
