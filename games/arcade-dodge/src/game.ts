@@ -118,8 +118,25 @@ export function start(state: GameState): GameState {
   return state;
 }
 
-export function restart(state: GameState): GameState {
-  state.rng = new Rng(`${Date.now()}-${state.width}`);
+/**
+ * A seed the player has never played. The clock keeps consecutive runs apart; the
+ * current rng keeps two restarts inside the same millisecond apart.
+ */
+function nextSeed(state: GameState): string {
+  return `${Date.now()}-${state.width}-${state.rng.int(0, 0x7fffffff)}`;
+}
+
+/**
+ * Starts a brand new run under a brand new seed.
+ *
+ * `state.seed` and `state.rng` are always written together: that invariant is what
+ * makes the seed in a feedback report replay the run the player actually played.
+ * Pass `seed` to pin a run (tests, replays); omit it for a fresh random one.
+ */
+export function restart(state: GameState, seed?: number | string): GameState {
+  const next = seed ?? nextSeed(state);
+  state.seed = next;
+  state.rng = new Rng(next);
   return start(state);
 }
 
