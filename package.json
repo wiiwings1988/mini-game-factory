@@ -1,7 +1,7 @@
 {
   "name": "mini-game-factory",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "AI-first mini game factory: one TypeScript codebase for web / WeChat mini game / iOS / Android, wired to a Multica board for feedback -> issue -> fix -> publish.",
   "type": "module",
   "engines": {
