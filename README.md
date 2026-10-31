@@ -100,4 +100,6 @@ agent 的完整职责写在 `docs/multica/agents/*.md`，Multica 侧由 `node to
 1. **微信登录 / 内购**：适配器接口留好了，具体实现在 `packages/platform`；要真接需要 appid 与商店后台。
 2. **itch.io 上传**：`scripts/publish.mjs --target itch` 已写好，需要本机装 butler 与项目名。
 3. **Capacitor 原生壳**：`apps/web` 产物可直接包，还没包（要先决定 iOS/Android 的签名与版本策略）。
-4. **远端反馈台**：现在只监听 127.0.0.1，玩家在外网提交不到；上线前要么放公网（带限流与鉴权），要么走微信云函数。
+4. **远端反馈台**：现在只监听 127.0.0.1，Pages 版玩家提交不到（弹窗会如实报错，不会假成功）。
+   上线前要把反馈台放公网（带限流与鉴权），再在仓库变量里设 `FEEDBACK_ENDPOINT`，
+   Pages 构建会把它打进前端（`.github/workflows/pages.yml` 已接好这个口子）。

@@ -32,6 +32,10 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm test
       - run: node scripts/build.mjs --target web
+        env:
+          # Set the repo variable FEEDBACK_ENDPOINT to a public feedback desk URL
+          # once it exists; empty falls back to the same-origin /api/feedback.
+          VITE_FEEDBACK_ENDPOINT: ${{ vars.FEEDBACK_ENDPOINT }}
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
