@@ -13,29 +13,31 @@
 #
 # 迁到云主机时，整个目录原样复制过去，只改 .env 里的 FRONTEND_URL。
 
-services:
-  base: &base
-    image: chatwoot/chatwoot:latest
-    env_file: .env
-    environment:
-      - NODE_ENV=production
-      - RAILS_ENV=production
-      - INSTALLATION_ENV=docker
-      - POSTGRES_HOST=postgres
-      - POSTGRES_USERNAME=postgres
-      - POSTGRES_DATABASE=chatwoot_production
-      - REDIS_URL=redis://redis:6379
-      - RAILS_MAX_THREADS=5
-      - WEB_CONCURRENCY=2
-    volumes:
-      - chatwoot_storage:/app/storage
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_started
-    restart: unless-stopped
+x-base: &base
+  image: chatwoot/chatwoot:latest
+  env_file: .env
+  environment:
+    - NODE_ENV=production
+    - RAILS_ENV=production
+    - INSTALLATION_ENV=docker
+    - POSTGRES_HOST=postgres
+    - POSTGRES_USERNAME=postgres
+    - POSTGRES_DATABASE=chatwoot_production
+    - REDIS_URL=redis://redis:6379
+    - RAILS_MAX_THREADS=5
+    - WEB_CONCURRENCY=2
+    # 网站 widget 从玩家浏览器跨域调 /api/v1/widget/*，不开这个会被浏览器拦掉
+    - ENABLE_API_CORS=true
+  volumes:
+    - chatwoot_storage:/app/storage
+  depends_on:
+    postgres:
+      condition: service_healthy
+    redis:
+      condition: service_started
+  restart: unless-stopped
 
+services:
   rails:
     <<: *base
     ports:

@@ -37,9 +37,18 @@ cp .env.example .env      # 然后填两个随机串：
 #   openssl rand -hex 16   → POSTGRES_PASSWORD
 docker compose run --rm rails bundle exec rails db:chatwoot_prepare   # 仅首次
 docker compose up -d
+
+# 建管理员 + 网站收件箱，打出 WEBSITE_TOKEN（邮箱域名要有 MX 记录，
+# 否则 Chatwoot 的注册校验会判 invalid，所以这里绕开注册页直接建）
+SEED_EMAIL=you@example.com SEED_PASSWORD='...' \
+  docker compose exec -T -e SEED_EMAIL -e SEED_PASSWORD rails \
+  bundle exec rails runner /dev/stdin < seed.rb
 ```
 
-起来后 <http://localhost:3000> 建管理员账号。
+起来后 <http://localhost:3000> 用那个账号登录。
+
+注意 compose 里开了 `ENABLE_API_CORS=true`：网站 widget 从玩家浏览器跨域调
+`/api/v1/widget/*`，不开这个，浏览器会把请求拦掉（现象是 widget 能弹出但发不出消息）。
 
 ## 接到游戏页
 
