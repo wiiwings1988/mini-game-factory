@@ -1,0 +1,11 @@
+{
+  "appid": "touristappid",
+  "projectname": "arcade-dodge",
+  "compileType": "game",
+  "miniprogramRoot": "./",
+  "setting": {
+    "es6": true,
+    "minified": true,
+    "urlCheck": true
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "name": "mini-game-factory",
+  "private": true,
+  "version": "0.1.0",
+  "description": "AI-first mini game factory: one TypeScript codebase for web / WeChat mini game / iOS / Android, wired to a Multica board for feedback -> issue -> fix -> publish.",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "vite --config apps/web/vite.config.ts",
+    "build": "node scripts/build.mjs",
+    "build:web": "node scripts/build.mjs --target web",
+    "build:wx": "node scripts/build.mjs --target wx",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "preview": "node scripts/preview.mjs",
+    "feedback": "node tools/feedback-service/src/server.mjs",
+    "release": "node scripts/release.mjs",
+    "publish": "node scripts/publish.mjs",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.5",
+    "vitest": "^2.1.8"
+  }
+}

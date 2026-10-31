@@ -1,0 +1,11 @@
+node_modules/
+dist/
+releases/
+public/
+tools/feedback-service/data/
+.gh-pages-worktree/
+.multica-state.json
+*.log
+.DS_Store
+.env
+.env.*

@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+    <meta name="theme-color" content="#0b1220" />
+    <title>Arcade Dodge</title>
+    <link rel="stylesheet" href="./src/style.css" />
+  </head>
+  <body>
+    <main class="stage">
+      <canvas id="game" aria-label="Arcade Dodge"></canvas>
+    </main>
+
+    <dialog id="feedback" class="sheet">
+      <form method="dialog" id="feedback-form">
+        <h2>给我们一句话</h2>
+        <p class="hint">Bug、手感、想要的功能都可以。客服会把它变成一条待办的 issue。</p>
+
+        <div class="kinds" role="radiogroup" aria-label="反馈类型">
+          <label><input type="radio" name="kind" value="bug" checked /> 有问题</label>
+          <label><input type="radio" name="kind" value="idea" /> 想要</label>
+          <label><input type="radio" name="kind" value="other" /> 其他</label>
+        </div>
+
+        <textarea name="message" required maxlength="2000" rows="4" placeholder="比如：第二关开始卡顿 / 想要排行榜"></textarea>
+        <input name="contact" maxlength="120" placeholder="联系方式（可选，方便回你）" />
+
+        <div class="row">
+          <button value="cancel" class="ghost" formnovalidate>算了</button>
+          <button value="send" class="primary" id="send">发出去</button>
+        </div>
+        <p id="feedback-status" class="status" role="status"></p>
+      </form>
+    </dialog>
+
+    <script type="module" src="./src/main.ts"></script>
+  </body>
+</html>

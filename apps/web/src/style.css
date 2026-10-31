@@ -1,0 +1,143 @@
+:root {
+  color-scheme: dark;
+  --bg: #070c16;
+  --panel: #0f172a;
+  --text: #e2e8f0;
+  --dim: #94a3b8;
+  --accent: #22d3ee;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", system-ui, sans-serif;
+  overscroll-behavior: none;
+}
+
+.stage {
+  display: grid;
+  place-items: center;
+  height: 100dvh;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+canvas {
+  display: block;
+  width: min(100vw, 520px);
+  height: min(100dvh, calc(min(100vw, 520px) * 16 / 9));
+  max-height: 100dvh;
+  touch-action: none;
+  border-radius: 14px;
+  background: #0b1220;
+  box-shadow: 0 24px 60px rgba(2, 6, 23, 0.7);
+}
+
+.sheet {
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  border-radius: 16px;
+  background: var(--panel);
+  color: var(--text);
+  width: min(92vw, 420px);
+  padding: 20px;
+}
+
+.sheet::backdrop {
+  background: rgba(2, 6, 23, 0.72);
+}
+
+.sheet h2 {
+  margin: 0 0 6px;
+  font-size: 18px;
+}
+
+.hint {
+  margin: 0 0 14px;
+  color: var(--dim);
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+.kinds {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.kinds label {
+  flex: 1;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  border-radius: 10px;
+  padding: 8px 10px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.kinds input {
+  margin-right: 6px;
+  accent-color: var(--accent);
+}
+
+textarea,
+input[type="text"],
+input:not([type]) {
+  width: 100%;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  border-radius: 10px;
+  background: #0b1220;
+  color: var(--text);
+  padding: 10px 12px;
+  font: inherit;
+  font-size: 13.5px;
+  margin-bottom: 10px;
+  resize: vertical;
+}
+
+.row {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 4px;
+}
+
+button {
+  border-radius: 10px;
+  border: 1px solid transparent;
+  padding: 9px 16px;
+  font: inherit;
+  font-size: 13.5px;
+  cursor: pointer;
+}
+
+button.primary {
+  background: var(--accent);
+  color: #04222b;
+  font-weight: 600;
+}
+
+button.ghost {
+  background: transparent;
+  color: var(--dim);
+  border-color: rgba(148, 163, 184, 0.3);
+}
+
+.status {
+  margin: 10px 0 0;
+  min-height: 18px;
+  font-size: 12.5px;
+  color: var(--dim);
+}
+
+.status.ok {
+  color: #4ade80;
+}
+
+.status.err {
+  color: #fb7185;
+}
