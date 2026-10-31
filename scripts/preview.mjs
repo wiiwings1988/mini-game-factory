@@ -4,7 +4,7 @@
  * local play-test exercises the same paths as production.
  *
  *   node scripts/preview.mjs                 # :4173, proxies /api → :8787
- *   node scripts/preview.mjs --port 5000 --dir dist/web --api http://127.0.0.1:8787
+ *   node scripts/preview.mjs --port 5000 --dir dist/web --host 0.0.0.0   # 局域网/手机可开
  */
 import { createServer } from "node:http";
 import { createReadStream, existsSync, statSync } from "node:fs";
@@ -14,6 +14,7 @@ import { fileURLToPath } from "node:url";
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const args = process.argv.slice(2);
 const port = Number(valueOf("--port") ?? 4173);
+const host = valueOf("--host") ?? "127.0.0.1";
 const dir = resolve(root, valueOf("--dir") ?? "dist/web");
 const api = valueOf("--api") ?? "http://127.0.0.1:8787";
 
@@ -75,8 +76,8 @@ const server = createServer(async (req, res) => {
   return createReadStream(filePath).pipe(res);
 });
 
-server.listen(port, "127.0.0.1", () => {
-  console.log(`[preview] http://127.0.0.1:${port}  dir=${dir}  api→${api}`);
+server.listen(port, host, () => {
+  console.log(`[preview] http://${host}:${port}  dir=${dir}  api→${api}`);
 });
 
 function valueOf(flag) {

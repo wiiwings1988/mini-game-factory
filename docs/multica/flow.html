@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>小游戏工厂 · 运转流程图</title>
+<style>
+  :root {
+    color-scheme: dark;
+    --bg: #070c16;
+    --card: #0f172a;
+    --card2: #111c31;
+    --line: rgba(148,163,184,.22);
+    --text: #e2e8f0;
+    --dim: #94a3b8;
+    --sys: #38bdf8;
+    --agent: #a78bfa;
+    --human: #fbbf24;
+    --bad: #fb7185;
+    --ok: #4ade80;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 14px/1.6 -apple-system, BlinkMacSystemFont, "PingFang SC", system-ui, sans-serif;
+  }
+  .page { max-width: 960px; margin: 0 auto; padding: 28px 20px 64px; }
+  h1 { font-size: 21px; margin: 0 0 6px; letter-spacing: .01em; }
+  .sub { margin: 0 0 14px; color: var(--dim); font-size: 13px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; margin: 0 0 26px; padding: 0; list-style: none; font-size: 12px; color: var(--dim); }
+  .legend i { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 6px; vertical-align: 1px; }
+
+  .flow { display: flex; flex-direction: column; }
+  .step {
+    position: relative; border: 1px solid var(--line); border-radius: 12px;
+    background: var(--card); padding: 14px 16px 14px 54px;
+  }
+  .step .num {
+    position: absolute; left: 14px; top: 14px; width: 26px; height: 26px; border-radius: 8px;
+    display: grid; place-items: center; font-size: 12px; font-weight: 700; color: #04222b; background: var(--sys);
+  }
+  .step.agent { border-color: rgba(167,139,250,.35); }
+  .step.agent .num { background: var(--agent); color: #1e1035; }
+  .step h3 { margin: 0 0 4px; font-size: 15px; }
+  .step .who { color: var(--dim); font-size: 12px; margin-bottom: 8px; }
+  .step p { margin: 0 0 6px; font-size: 13px; }
+  .step .out { font-size: 12.5px; color: var(--dim); }
+  .step .out b { color: var(--text); font-weight: 600; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .chip {
+    font-size: 11.5px; padding: 2px 8px; border-radius: 999px;
+    border: 1px solid var(--line); color: var(--dim);
+  }
+  .chip.t { color: var(--sys); border-color: rgba(56,189,248,.4); }
+  .chip.e { color: var(--ok); border-color: rgba(74,222,128,.4); }
+  .chip.b { color: var(--bad); border-color: rgba(251,113,133,.45); }
+
+  .arrow { height: 26px; display: grid; place-items: center; color: var(--dim); font-size: 12px; position: relative; }
+  .arrow span {
+    z-index: 1; padding: 1px 10px; border-radius: 999px;
+    background: #0b1424; border: 1px solid rgba(148,163,184,.28); color: var(--dim);
+  }
+  .arrow::before {
+    content: ""; position: absolute; top: 0; bottom: 0; left: 50%; width: 1px;
+    background: linear-gradient(to bottom, rgba(148,163,184,.45), rgba(148,163,184,.15));
+  }
+
+  .gate {
+    border: 1px solid rgba(251,191,36,.45); border-radius: 12px;
+    background: linear-gradient(180deg, rgba(251,191,36,.10), rgba(251,191,36,.04));
+    padding: 13px 16px; display: flex; gap: 12px; align-items: flex-start;
+  }
+  .gate .pill {
+    flex: none; font-size: 11px; font-weight: 700; color: #2b1d02;
+    background: var(--human); border-radius: 6px; padding: 2px 8px; margin-top: 1px;
+  }
+  .gate h3 { margin: 0 0 3px; font-size: 14px; color: #fde68a; }
+  .gate p { margin: 0; font-size: 12.5px; color: #e8d9b0; }
+
+  .branch {
+    margin: 4px 0 4px 26px; border-left: 2px dashed rgba(148,163,184,.3);
+    padding: 6px 0 6px 16px; font-size: 12.5px; color: var(--dim);
+  }
+  .branch b { color: var(--text); font-weight: 600; }
+
+  h2 { font-size: 15px; margin: 34px 0 12px; }
+  .truth { display: grid; gap: 10px; }
+  .row {
+    display: grid; grid-template-columns: 76px 1fr; gap: 12px; align-items: start;
+    border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; background: var(--card2);
+    font-size: 12.5px;
+  }
+  .row .tag { font-size: 11px; font-weight: 700; text-align: center; border-radius: 6px; padding: 2px 0; }
+  .row.ok .tag { background: rgba(74,222,128,.15); color: var(--ok); border: 1px solid rgba(74,222,128,.4); }
+  .row.no .tag { background: rgba(251,113,133,.13); color: var(--bad); border: 1px solid rgba(251,113,133,.45); }
+  .row.wi .tag { background: rgba(148,163,184,.12); color: var(--dim); border: 1px solid var(--line); }
+  .row p { margin: 0; }
+  .row p + p { margin-top: 3px; color: var(--dim); }
+
+  @media (max-width: 640px) {
+    .step { padding-left: 16px; padding-top: 44px; }
+    .step .num { top: 12px; }
+    .row { grid-template-columns: 1fr; }
+    .row .tag { justify-self: start; padding: 2px 10px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <h1>小游戏工厂 · 现在真实的运转图</h1>
+  <p class="sub">2026-10-31 的实况，不是目标态。最下面一行写清了哪些通了、哪些还卡着。</p>
+  <ul class="legend">
+    <li><i style="background:#38bdf8"></i>服务 / 平台</li>
+    <li><i style="background:#a78bfa"></i>AI 智能体</li>
+    <li><i style="background:#fbbf24"></i>必须你来的地方</li>
+    <li><i style="background:#fb7185"></i>当前卡点</li>
+  </ul>
+
+  <div class="flow">
+
+    <div class="step">
+      <div class="num">1</div>
+      <h3>玩家在网页里玩</h3>
+      <div class="who">GitHub Pages · https://wiiwings1988.github.io/mini-game-factory/</div>
+      <p>右上角有个「反馈」按钮，点开写一句话就能交。分数、关卡、种子一起带上，客服不用再问「你在哪一步卡的」。</p>
+      <div class="out">产出：<b>一条玩家原话 + 当时的游戏内状态</b></div>
+    </div>
+
+    <div class="arrow"><span>提交</span></div>
+
+    <div class="step">
+      <div class="num">2</div>
+      <h3>反馈台收下并落库</h3>
+      <div class="who">本机 :8787 · SQLite · 开机自启（launchd）</div>
+      <p>写进状态为 <code>new</code> 的队列，网页收件箱能直接看、能改状态。只做「存、读、通知」三件事，分类去重是客服的活，不放在这里。</p>
+      <div class="out">产出：<b>feedback(status=new)</b></div>
+      <div class="chips"><span class="chip e">已验证：真提交过 3 条</span></div>
+    </div>
+
+    <div class="arrow"><span>每 20 分钟</span></div>
+
+    <div class="step agent">
+      <div class="num">3</div>
+      <h3>客服-CS 把抱怨变成工单</h3>
+      <div class="who">autopilot <code>feedback-triage</code> · 定时 */20 · Asia/Shanghai</div>
+      <p>拉 <code>new</code> 队列 → 去重（先搜已有 issue）→ 分类（bug / 建议 / 噪声）→ 定级 → 建 issue 指派给开发 → 把 issue 号写回反馈。</p>
+      <div class="out">产出：<b>带复现信息的 issue</b> + 反馈状态变 <code>issue_created</code></div>
+      <div class="chips">
+        <span class="chip t">每 20 分钟</span>
+        <span class="chip e">已验证：建出 CANO-13 / 14 / 15</span>
+      </div>
+    </div>
+
+    <div class="arrow"><span>issue 指派即触发</span></div>
+
+    <div class="step agent">
+      <div class="num">4</div>
+      <h3>开发-Dev 修代码</h3>
+      <div class="who">issue 指派给「开发-Dev」时自动起一个任务，在独立分支上干活</div>
+      <p>先写一条会红的测试 → 改代码 → 三条验证（类型检查 / 单测 / 双端构建）→ 推分支 → 开 PR，标题带 issue 号，Multica 才认得出这条 PR 属于哪个 issue。</p>
+      <div class="out">产出：<b>一个 PR</b>（还没合并）</div>
+      <div class="chips">
+        <span class="chip b">当前卡点：提交被权限挡住</span>
+        <span class="chip">代码写完了，补丁贴在 issue 上</span>
+      </div>
+    </div>
+
+    <div class="arrow"><span>PR 出来</span></div>
+
+    <div class="gate">
+      <span class="pill">你</span>
+      <div>
+        <h3>闸门一：合不合这个 PR</h3>
+        <p>AI 改代码的地方，人只看这一眼：diff 改了什么、测试有没有被偷偷删、验收标准对不对得上。这一步没有捷径——把它自动化掉，等于让写代码的人自己判断该不该上线。</p>
+      </div>
+    </div>
+
+    <div class="arrow"><span>合并进主干</span></div>
+
+    <div class="step agent">
+      <div class="num">5</div>
+      <h3>质检-QA 独立验一遍</h3>
+      <div class="who">autopilot <code>nightly-qa</code> · 每天 03:00</div>
+      <p>重跑类型检查与单测、尝试复现「还没人能复现」的工单、审打开的 PR（重点看有没有改断言迁就实现）、对线上 Pages 做冒烟（必须 200 且不是空壳）。发现新问题自己开 issue 派回第 4 步。</p>
+      <div class="out">产出：<b>验证记录 / 新工单</b></div>
+      <div class="chips"><span class="chip t">每天 03:00</span></div>
+    </div>
+
+    <div class="arrow"><span>每天 21:00 或手动</span></div>
+
+    <div class="step agent">
+      <div class="num">6</div>
+      <h3>发布-Release 发版</h3>
+      <div class="who">autopilot <code>release-check</code> · 每天 21:00</div>
+      <p>四道门全过才动手：PR 已合并、master 的 CI 是绿的、工作区干净、这个版本号还没发过。然后冻结版本目录 → 发布 → 等 Pages 生效 → 把版本号写回 issue 和相关反馈。</p>
+      <div class="out">产出：<b>releases/&lt;版本&gt;/</b> + 新版上线 + 反馈状态变 <code>published</code></div>
+      <div class="chips">
+        <span class="chip t">每天 21:00</span>
+        <span class="chip">尚未实跑过一次</span>
+      </div>
+    </div>
+
+    <div class="arrow"><span>玩家打开就是新版</span></div>
+
+    <div class="step">
+      <div class="num">7</div>
+      <h3>闭环回到第 1 步</h3>
+      <div class="who">同一个链接，不需要重新安装</div>
+      <p>玩家下一轮反馈又进第 2 步。同一条反馈从「收到」到「上线」全程挂在一个 issue 上，谁改的、凭什么发、发的是哪个版本，都能倒查。</p>
+    </div>
+
+  </div>
+
+  <div class="branch" style="margin-top:14px">
+    <b>旁路（不占主线）：</b>周一 10:00 <b>制作-Producer</b> 把一周的反馈按主题聚类，证据够（≥2 条同类）才写规格 issue 派给开发，不够就留着不立项。
+  </div>
+
+  <h2>你在这条链上只出现三次</h2>
+  <div class="truth">
+    <div class="row no" style="border-color:rgba(251,191,36,.35);background:rgba(251,191,36,.06)">
+      <span class="tag" style="background:rgba(251,191,36,.16);color:#fbbf24;border:1px solid rgba(251,191,36,.45)">入口</span>
+      <div>
+        <p><b>定需求时：写清验收标准。</b>一句话说清要什么，再说怎么算做完（比如「分享按钮：微信里能发到会话和朋友圈，卡片带最高分；网页端退化成复制链接」）。</p>
+        <p>这条必须你写。让 agent 自己写验收，它会照着自己做得到的事写。</p>
+      </div>
+    </div>
+    <div class="row no" style="border-color:rgba(251,191,36,.35);background:rgba(251,191,36,.06)">
+      <span class="tag" style="background:rgba(251,191,36,.16);color:#fbbf24;border:1px solid rgba(251,191,36,.45)">合并</span>
+      <div>
+        <p><b>PR 出来时：看一眼 diff 再合。</b>不用逐行读，但要确认三件事：改动范围是不是这件事、测试是真加了还是被改了、有没有夹带别的改动。</p>
+      </div>
+    </div>
+    <div class="row no" style="border-color:rgba(251,191,36,.35);background:rgba(251,191,36,.06)">
+      <span class="tag" style="background:rgba(251,191,36,.16);color:#fbbf24;border:1px solid rgba(251,191,36,.45)">仲裁</span>
+      <div>
+        <p><b>issue 变 blocked 时：拍一下。</b>agent 会把卡在哪一步、有哪几条路、各自代价写清楚。你只需要选一条。</p>
+      </div>
+    </div>
+  </div>
+
+  <h2>这条链现在到底通到哪</h2>
+  <div class="truth">
+    <div class="row ok">
+      <span class="tag">已通</span>
+      <div>
+        <p>玩家反馈 → 落库 → 客服建 issue → 指派开发。3 条真反馈变成了 CANO-13 / 14 / 15，反馈状态也回写了。</p>
+        <p>依据：<code>curl :8787/api/stats</code> 显示 3 条都已是 <code>issue_created</code>。</p>
+      </div>
+    </div>
+    <div class="row ok">
+      <span class="tag">已通</span>
+      <div>
+        <p>构建 → 发布 → 线上。web 14 KB / 微信小游戏 11 KB，Pages 由 Actions 部署，页面与产物都 200。</p>
+        <p>依据：GitHub Actions 三次全绿；Pages 用真浏览器打开过，无报错。</p>
+      </div>
+    </div>
+    <div class="row no">
+      <span class="tag">卡住</span>
+      <div>
+        <p>第 4 步「开发提交代码」不通：agent 能把代码改对、三条验证全绿，但写不进 git 索引，所以出不了分支和 PR。CANO-13 与 CANO-15 因此停在 blocked。</p>
+        <p>两个原因叠在一起：本机 git 2.39 太老（这套工作区续跑要 2.40+）；agent 的权限模式是「问」，无人值守时「问」等于「拒」。git 已装到 2.56，等 Multica 重启后 daemon 才用得上。</p>
+      </div>
+    </div>
+    <div class="row wi">
+      <span class="tag">没接</span>
+      <div>
+        <p>线上反馈收不到：Pages 是纯静态，没有后端。要先把反馈台放到公网，再把地址打进构建。</p>
+        <p>登录与内购只有接口和占位实现，没对接任何商店。</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
