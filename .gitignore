@@ -9,3 +9,6 @@ tools/feedback-service/data/
 .DS_Store
 .env
 .env.*
+.pnpm-store/
+.reasonix/
+.multica/
