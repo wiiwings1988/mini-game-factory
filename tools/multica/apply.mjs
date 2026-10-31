@@ -134,8 +134,9 @@ function ensureAutopilots(projectId) {
     }
     state.autopilots[ap.title] = id;
 
-    const triggers = cli(["autopilot", "trigger-list", id, "--output", "json"], { allowFail: true }).data ?? [];
-    const hasSchedule = Array.isArray(triggers) && triggers.some((t) => (t.kind ?? t.type) === "schedule");
+    const listedTriggers = cli(["autopilot", "trigger-list", id, "--output", "json"], { allowFail: true }).data;
+    const triggers = Array.isArray(listedTriggers) ? listedTriggers : (listedTriggers?.triggers ?? []);
+    const hasSchedule = triggers.some((t) => (t.kind ?? t.type) === "schedule");
     if (!hasSchedule) {
       cli([
         "autopilot", "trigger-add", id,
