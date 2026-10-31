@@ -1,0 +1,70 @@
+{
+  "project": "小游戏工厂 Mini Game Factory",
+  "agents": [
+    {
+      "name": "客服-CS",
+      "emoji": "🎧",
+      "description": "把反馈池里的玩家原话变成可执行的 issue（去重、分类、定级、指派）",
+      "doc": "docs/multica/agents/cs.md",
+      "runtime": "reasonix"
+    },
+    {
+      "name": "开发-Dev",
+      "emoji": "🛠",
+      "description": "接 issue 改代码，先写会红的测试，开 PR",
+      "doc": "docs/multica/agents/dev.md",
+      "runtime": "reasonix"
+    },
+    {
+      "name": "质检-QA",
+      "emoji": "🧪",
+      "description": "独立复现与回归，审 PR，线上冒烟，发现新问题开 issue",
+      "doc": "docs/multica/agents/qa.md",
+      "runtime": "reasonix"
+    },
+    {
+      "name": "发布-Release",
+      "emoji": "🚀",
+      "description": "四道门通过后才发布，写版本号回 issue 与反馈",
+      "doc": "docs/multica/agents/release.md",
+      "runtime": "reasonix"
+    },
+    {
+      "name": "制作-Producer",
+      "emoji": "🎬",
+      "description": "从反馈聚类出下一版玩法规格，不写代码",
+      "doc": "docs/multica/agents/producer.md",
+      "runtime": "reasonix"
+    }
+  ],
+  "autopilots": [
+    {
+      "title": "feedback-triage",
+      "agent": "客服-CS",
+      "mode": "run_only",
+      "cron": "*/20 * * * *",
+      "description": "去反馈台取 status=new 的玩家反馈，去重、分类、定级，建成 issue 并指派给 开发-Dev，然后把反馈回写成 issue_created。一次最多 10 条；没有新反馈就直接说没有，不要编。\n\n步骤与判据见 docs/multica/agents/cs.md。"
+    },
+    {
+      "title": "nightly-qa",
+      "agent": "质检-QA",
+      "mode": "run_only",
+      "cron": "0 3 * * *",
+      "description": "夜间回归：跑类型检查、单测、双端构建；审所有打开的 PR；对线上 Pages 做冒烟（必须 200 且不是空壳）；把带 needs-repro 的 issue 尝试复现。发现新问题开 issue 派给 开发-Dev。\n\n步骤见 docs/multica/agents/qa.md。"
+    },
+    {
+      "title": "release-check",
+      "agent": "发布-Release",
+      "mode": "run_only",
+      "cron": "0 21 * * *",
+      "description": "检查今天是否有「PR 已合并 + CI 绿」但还没发版的修复；有就发一个补丁版本（release → publish → 回写 issue 与反馈），没有就明确说今天没有可发的东西。\n\n四道门与步骤见 docs/multica/agents/release.md。"
+    },
+    {
+      "title": "weekly-producer",
+      "agent": "制作-Producer",
+      "mode": "run_only",
+      "cron": "0 10 * * 1",
+      "description": "每周一：把过去一周的玩家反馈按主题聚类，挑出证据最足的 1–3 个方向写成规格 issue。少于 2 条同类反馈不立项。\n\n格式与判据见 docs/multica/agents/producer.md。"
+    }
+  ]
+}
