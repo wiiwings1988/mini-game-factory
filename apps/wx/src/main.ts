@@ -10,7 +10,7 @@ import { mount } from "@factory/games/arcade-dodge";
 
 const platform = createWxPlatform({
   feedbackEndpoint: "https://feedback.example.com/api/feedback",
-  appVersion: "0.1.0",
+  appVersion: "0.1.1",
 });
 
 mount(platform, {

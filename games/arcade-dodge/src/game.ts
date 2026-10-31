@@ -224,3 +224,69 @@ export function isOnFeedbackButton(state: GameState, x: number, y: number): bool
   const r = feedbackButtonRect(state);
   return x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h;
 }
+
+/**
+ * The HUD's score/best column. It is derived from the feedback button instead of
+ * hard-coded, so the two can never grow into each other: `maxRight` is always
+ * left of the button, whatever the canvas width.
+ */
+export interface HudLayout {
+  left: number;
+  scoreTop: number;
+  bestTop: number;
+  /** Right-most x the HUD text may occupy. Always left of the feedback button. */
+  maxRight: number;
+  /** Filled plate behind the text, so grid lines never run through the numbers. */
+  plate: { x: number; y: number; w: number; h: number };
+}
+
+const HUD_LEFT = 14;
+const HUD_TOP = 14;
+const HUD_PAD_X = 6;
+const HUD_PAD_Y = 6;
+/** Breathing room between the HUD column and the feedback button. */
+const HUD_GAP = 8;
+const HUD_SCORE_FONT_PX = 20;
+const HUD_BEST_FONT_PX = 12;
+const HUD_LINE_GAP = 26;
+
+export function hudLayout(state: GameState): HudLayout {
+  const button = feedbackButtonRect(state);
+  const plateX = HUD_LEFT - HUD_PAD_X;
+  const reserveRight = Math.min(state.width, button.x - HUD_GAP);
+  const maxRight = Math.max(HUD_LEFT, reserveRight);
+  const scoreTop = HUD_TOP;
+  const bestTop = HUD_TOP + HUD_LINE_GAP;
+  const contentWidth = Math.max(
+    estimateTextWidth(String(state.score), HUD_SCORE_FONT_PX),
+    estimateTextWidth(`最高 ${state.best}`, HUD_BEST_FONT_PX),
+  );
+  const plateW = Math.max(0, Math.min(contentWidth + HUD_PAD_X * 2, reserveRight - plateX));
+  return {
+    left: HUD_LEFT,
+    scoreTop,
+    bestTop,
+    maxRight,
+    plate: {
+      x: plateX,
+      y: HUD_TOP - HUD_PAD_Y,
+      w: plateW,
+      h: bestTop + HUD_BEST_FONT_PX * 0.8 + HUD_PAD_Y - (HUD_TOP - HUD_PAD_Y),
+    },
+  };
+}
+
+export const HUD_FONTS = { score: HUD_SCORE_FONT_PX, best: HUD_BEST_FONT_PX } as const;
+
+/**
+ * Width estimate for the HUD fonts. `Canvas2DLike` has no `measureText` (the
+ * browser and the WeChat mini game disagree on metrics), so the layout reserves
+ * space from a deterministic estimate: CJK ≈ 1em, everything else ≈ 0.62em.
+ */
+export function estimateTextWidth(text: string, fontPx: number): number {
+  let width = 0;
+  for (const char of text) {
+    width += /[\u2e80-\u9fff\uff00-\uffef]/.test(char) ? fontPx : fontPx * 0.62;
+  }
+  return width;
+}
